@@ -32,6 +32,7 @@ export function createStartServeSimRemoteSessionBuildFunction(
 
       const { previewUrl, streamUrl } = await startServeSimWithTunnelAsync({
         baseDomain: ngrokTunnelDomain,
+        ctx,
         env,
         logger,
         timeoutMs: STARTUP_TIMEOUT_MS,

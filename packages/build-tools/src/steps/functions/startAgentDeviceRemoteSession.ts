@@ -110,6 +110,7 @@ export function createStartAgentDeviceRemoteSessionBuildFunction(
       if (runtimePlatform === BuildRuntimePlatform.DARWIN) {
         const { previewUrl } = await startServeSimWithTunnelAsync({
           baseDomain: ngrokTunnelDomain,
+          ctx,
           env,
           logger,
           timeoutMs: STARTUP_TIMEOUT_MS,
