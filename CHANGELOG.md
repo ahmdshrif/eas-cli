@@ -10,6 +10,7 @@ This is the log of notable changes to EAS CLI and related packages.
 
 - [eas-cli] Add `eas integrations:posthog:connect` command. ([#3836](https://github.com/expo/eas-cli/pull/3836) by [@gwdp](https://github.com/gwdp))
 - [eas-cli] Add `eas integrations:posthog:dashboard` command. ([#3837](https://github.com/expo/eas-cli/pull/3837) by [@gwdp](https://github.com/gwdp))
+- [eas-cli] Add `eas integrations:posthog:disconnect` command. ([#3838](https://github.com/expo/eas-cli/pull/3838) by [@gwdp](https://github.com/gwdp))
 
 ### 🐛 Bug fixes
 
