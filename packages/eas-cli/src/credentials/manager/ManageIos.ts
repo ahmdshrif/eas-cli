@@ -256,17 +256,26 @@ export class ManageIos {
       return;
     }
 
-    const distributionType = await new SelectIosDistributionTypeGraphqlFromBuildProfile(
-      buildProfile
-    ).runAsync(ctx);
+    // Resolved lazily, because only build credential actions depend on the distribution type.
+    // Account-level actions (push keys, App Store Connect API keys) must stay reachable for
+    // profiles that would make this throw, e.g. `ios.simulator: true`.
+    let distributionTypePromise: Promise<IosDistributionTypeGraphql> | undefined;
+    const getDistributionTypeAsync = async (): Promise<IosDistributionTypeGraphql> => {
+      distributionTypePromise ??= new SelectIosDistributionTypeGraphqlFromBuildProfile(
+        buildProfile
+      ).runAsync(ctx);
+      return await distributionTypePromise;
+    };
 
     if (action === IosActionType.SetUpBuildCredentialsFromCredentialsJson) {
-      await new SetUpBuildCredentialsFromCredentialsJson(app, targets, distributionType).runAsync(
-        ctx
-      );
+      await new SetUpBuildCredentialsFromCredentialsJson(
+        app,
+        targets,
+        await getDistributionTypeAsync()
+      ).runAsync(ctx);
       return;
     } else if (action === IosActionType.UpdateCredentialsJson) {
-      await new UpdateCredentialsJson(app, targets, distributionType).runAsync(ctx);
+      await new UpdateCredentialsJson(app, targets, await getDistributionTypeAsync()).runAsync(ctx);
       return;
     }
 
@@ -283,7 +292,7 @@ export class ManageIos {
           target,
           appLookupParams,
           distCert,
-          distributionType
+          await getDistributionTypeAsync()
         );
         return;
       }
@@ -300,12 +309,13 @@ export class ManageIos {
             target,
             appLookupParams,
             distCert,
-            distributionType
+            await getDistributionTypeAsync()
           );
         }
         return;
       }
       case IosActionType.RemoveProvisioningProfile: {
+        const distributionType = await getDistributionTypeAsync();
         const iosAppCredentials = await ctx.ios.getIosAppCredentialsWithCommonFieldsAsync(
           ctx.graphqlClient,
           appLookupParams

@@ -22,6 +22,7 @@ This is the log of notable changes to EAS CLI and related packages.
 - [eas-cli] clean up error handling in local builds. ([#4105](https://github.com/expo/eas-cli/pull/4105) by [@douglowder](https://github.com/douglowder))
 - [build-tools] Install ffmpeg when it is missing so Argent screen recording works in EAS Simulator sessions. ([#4110](https://github.com/expo/eas-cli/pull/4110) by [@szdziedzic](https://github.com/szdziedzic))
 - [eas-cli] Stop simulator job runs when `eas simulator:start` is canceled before the session is ready. ([#4113](https://github.com/expo/eas-cli/pull/4113) by [@sjchmiela](https://github.com/sjchmiela))
+- [eas-cli] Allow setting up push notification and App Store Connect API keys in `eas credentials` when the selected build profile sets `ios.simulator: true`. ([#PR_NUMBER](https://github.com/expo/eas-cli/pull/PR_NUMBER) by [@ahmdshrif](https://github.com/ahmdshrif))
 
 ### 🧹 Chores
 
