@@ -270,32 +270,80 @@ export async function fileExistsAsync(filePath: string): Promise<boolean> {
     .then(() => true)
     .catch(() => false);
 }
+/**
+ * How long to wait for the first chunk of piped input before assuming that nothing is being piped
+ * in. CI agents commonly hand the command an inherited pipe that is not a TTY but never emits
+ * 'end', which would otherwise leave the command waiting forever.
+ */
+const STDIN_FIRST_CHUNK_TIMEOUT_MS = 1000;
+
 export async function maybeReadStdinAsync(): Promise<string | null> {
+  const stdin = process.stdin;
+
   // Check if there's data on stdin
-  if (process.stdin.isTTY) {
+  if (stdin.isTTY) {
+    return null;
+  }
+
+  // Nothing can ever arrive on a stream that is already finished, e.g. `< /dev/null`.
+  if (stdin.readableEnded || stdin.destroyed) {
     return null;
   }
 
   return await new Promise((resolve, reject) => {
     let data = '';
+    let settled = false;
 
-    process.stdin.setEncoding('utf8');
+    stdin.setEncoding('utf8');
 
-    process.stdin.on('readable', () => {
+    // Only the wait for the *first* chunk is bounded. Once anything has been piped in we wait for
+    // 'end' for as long as it takes, so real input is never truncated.
+    const firstChunkTimeout = setTimeout(() => {
+      finish(null);
+    }, STDIN_FIRST_CHUNK_TIMEOUT_MS);
+
+    function cleanup(): void {
+      clearTimeout(firstChunkTimeout);
+      stdin.off('readable', onReadable);
+      stdin.off('end', onEnd);
+      stdin.off('error', onError);
+    }
+
+    function finish(result: string | null): void {
+      if (settled) {
+        return;
+      }
+      settled = true;
+      cleanup();
+      resolve(result);
+    }
+
+    function onReadable(): void {
       let chunk;
-      while ((chunk = process.stdin.read()) !== null) {
+      while ((chunk = stdin.read()) !== null) {
         data += chunk;
       }
-    });
+      if (data !== '') {
+        clearTimeout(firstChunkTimeout);
+      }
+    }
 
-    process.stdin.on('end', () => {
-      const trimmedData = data.trim();
-      resolve(trimmedData || null);
-    });
+    function onEnd(): void {
+      finish(data.trim() || null);
+    }
 
-    process.stdin.on('error', err => {
+    function onError(err: Error): void {
+      if (settled) {
+        return;
+      }
+      settled = true;
+      cleanup();
       reject(err);
-    });
+    }
+
+    stdin.on('readable', onReadable);
+    stdin.on('end', onEnd);
+    stdin.on('error', onError);
   });
 }
 export async function showWorkflowStatusAsync(

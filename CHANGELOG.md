@@ -11,6 +11,7 @@ This is the log of notable changes to EAS CLI and related packages.
 ### 🐛 Bug fixes
 
 - [build-tools] Revert "Pin the default `agent-device` version for remote sessions" now that `agent-device` 0.20.5 fixes the broken release. ([#4144](https://github.com/expo/eas-cli/pull/4144) by [@gwdp](https://github.com/gwdp))
+- [eas-cli] Stop `eas workflow:run` from hanging forever on CI agents that hand the command an open, non-TTY stdin pipe that never emits `end`. ([#PR_NUMBER](https://github.com/expo/eas-cli/pull/PR_NUMBER) by [@ahmdshrif](https://github.com/ahmdshrif))
 
 ### 🧹 Chores
 
