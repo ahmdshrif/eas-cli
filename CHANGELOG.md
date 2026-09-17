@@ -10,6 +10,8 @@ This is the log of notable changes to EAS CLI and related packages.
 
 ### 🐛 Bug fixes
 
+- [eas-cli] Honor `--no-auto-testflight-setup` when the submit profile has no `ascAppId`, so `eas submit -p ios` no longer creates the `Team (Expo)` internal TestFlight group and enrolls every Apple team Admin after the user opted out. ([#PR_NUMBER](https://github.com/expo/eas-cli/pull/PR_NUMBER) by [@ahmdshrif](https://github.com/ahmdshrif))
+
 ### 🧹 Chores
 
 ## [24.7.0](https://github.com/expo/eas-cli/releases/tag/v24.7.0) - 2026-09-16
