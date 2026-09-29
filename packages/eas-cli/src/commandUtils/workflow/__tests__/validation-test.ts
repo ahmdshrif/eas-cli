@@ -1,4 +1,4 @@
-import { validateWorkflowStructure } from '../validation';
+import { validateWorkflowJobTypes, validateWorkflowStructure } from '../validation';
 
 const workflowSchema = {
   type: 'object',
@@ -58,5 +58,52 @@ describe(validateWorkflowStructure, () => {
     expect(() => {
       validateWorkflowStructure(workflowWithWebhookUrl('not a URL'), workflowSchema);
     }).toThrow('must be a valid URI string');
+  });
+});
+
+describe(validateWorkflowJobTypes, () => {
+  const schemaWithUntypedJob = {
+    type: 'object',
+    properties: {
+      jobs: {
+        type: 'object',
+        additionalProperties: {
+          anyOf: [
+            ...workflowSchema.properties.jobs.additionalProperties.anyOf,
+            {
+              type: 'object',
+              properties: {
+                name: { type: 'string' },
+                uses: { type: 'string' },
+                with: { type: 'object' },
+              },
+              required: ['uses'],
+              additionalProperties: false,
+            },
+          ],
+        },
+      },
+    },
+  };
+
+  it('ignores job schemas that do not declare a type', () => {
+    expect(() => {
+      validateWorkflowJobTypes(workflowWithWebhookUrl('https://example.com'), schemaWithUntypedJob);
+    }).not.toThrow();
+  });
+
+  it('allows jobs without a type', () => {
+    expect(() => {
+      validateWorkflowJobTypes(
+        { jobs: { reusable: { uses: './.eas/workflows/shared.yml' } } },
+        schemaWithUntypedJob
+      );
+    }).not.toThrow();
+  });
+
+  it('still rejects unknown job types', () => {
+    expect(() => {
+      validateWorkflowJobTypes({ jobs: { notify: { type: 'unknown' } } }, schemaWithUntypedJob);
+    }).toThrow('The following jobs have invalid types: notify. Valid types are: slack');
   });
 });

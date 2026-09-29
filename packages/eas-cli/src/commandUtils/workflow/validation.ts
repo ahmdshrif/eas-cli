@@ -128,7 +128,7 @@ async function validateWorkflowBuildJobsAsync(parsedYaml: any, projectDir: strin
   }
 }
 
-function validateWorkflowJobTypes(parsedYaml: any, workflowJsonSchema: any): void {
+export function validateWorkflowJobTypes(parsedYaml: any, workflowJsonSchema: any): void {
   const jobs = jobsFromWorkflow(parsedYaml);
   const jobTypes = jobTypesFromWorkflowSchema(workflowJsonSchema);
   const invalidJobs = jobs.filter(job => job.value.type && !jobTypes.includes(job.value.type));
@@ -206,7 +206,9 @@ function jobsFromWorkflow(parsedYaml: any): any[] {
 }
 
 function jobTypesFromWorkflowSchema(workflowJsonSchema: any): string[] {
-  return workflowJsonSchema?.properties?.jobs?.additionalProperties?.anyOf.map(
-    (props: any) => props.properties.type.const
-  );
+  const jobSchemas: any[] = workflowJsonSchema?.properties?.jobs?.additionalProperties?.anyOf ?? [];
+  // Some job schemas (e.g. jobs that reference a reusable workflow with `uses`) do not declare a `type`.
+  return jobSchemas
+    .map(jobSchema => jobSchema?.properties?.type?.const)
+    .filter((type): type is string => typeof type === 'string');
 }

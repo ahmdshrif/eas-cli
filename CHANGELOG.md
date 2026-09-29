@@ -13,6 +13,8 @@ This is the log of notable changes to EAS CLI and related packages.
 
 ### 🐛 Bug fixes
 
+- [eas-cli] Fix `workflow:validate` crashing with `Cannot read properties of undefined (reading 'const')` when the workflow schema contains a job without a `type`. ([#XXXX](https://github.com/expo/eas-cli/pull/XXXX) by [@ahmdshrif](https://github.com/ahmdshrif))
+
 ### 🧹 Chores
 
 ## [24.8.0](https://github.com/expo/eas-cli/releases/tag/v24.8.0) - 2026-09-24
