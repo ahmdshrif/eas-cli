@@ -49,15 +49,21 @@ export const infoRestrictedWords: IssueRule = {
 };
 
 function getDescriptionForFirstMatch(value: string): string | null {
-  const sanitized = value.toLowerCase();
-
   for (const [word, description] of Object.entries(RESTRICTED_WORDS)) {
-    if (sanitized.includes(word)) {
+    if (containsWord(value, word)) {
       return description;
     }
   }
 
   return null;
+}
+
+/**
+ * Match whole words only, so words like "betal" (Danish) or "betalen" (Dutch) are not reported.
+ * Uses Unicode-aware boundaries, since `\b` treats non-ASCII letters as word boundaries.
+ */
+function containsWord(value: string, word: string): boolean {
+  return new RegExp(`(?<![\\p{L}\\p{N}])${word}(?![\\p{L}\\p{N}])`, 'iu').test(value);
 }
 
 function getStringValue(value?: null | string | string[]): string {
